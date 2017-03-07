@@ -1,6 +1,6 @@
 package blacklist;
 
-import static java.util.Arrays.asList;
+import static blacklist.Streams.stream;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,25 +9,15 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class Aggregator {
 
-	static Set<String> hosts = new TreeSet<>();
-	static final Predicate<String> NOT_LOCALHOST = ((Predicate<String>) "localhost"::equalsIgnoreCase).negate();
-	static Predicate<String> all = s -> {
-		return true;
-	};
-	static Function<String, String> identity = s -> {
-		return s;
-	};
+	static final Hosts hosts = new Hosts();
+	
 	public static void main(String[] args) throws IOException {
-
 		Predicate<String> notEmpty = s -> {
 			return !s.isEmpty();
 		};
@@ -49,15 +39,18 @@ public class Aggregator {
 			        	map
 			        			.get("categories")
 			        			.get(category).stream().forEach(m-> {
-			        		m.entrySet().iterator().next().getValue().entrySet().iterator().next().getValue().stream().forEach(hosts::add);
+			        		m.entrySet().iterator().next().getValue().entrySet().iterator().next().getValue().stream().forEach(hosts);
 			        	});
 			        });
 			}
 		);
 		
-		
-		hosts.stream().forEach(System.out::println);
+		hosts.stats().forEach(System.out::println);
+		System.out.println("#########################");
+		hosts.toStream().forEach(System.out::println);
 	}
+
+	
 
 	private static void get(String url, Consumer<String> c) throws IOException {
 		try (Scanner s = new Scanner(new URL(url).openStream())) {
@@ -67,12 +60,10 @@ public class Aggregator {
 
 	private static void get(String url, Predicate<String> filter, Function<String, String> mapper) throws IOException {
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()))) {
-			in.lines().map(s -> s.trim()).filter(filter).map(mapper).filter(NOT_LOCALHOST).forEach(hosts::add);
+			in.lines().map(s -> s.trim()).filter(filter).map(mapper).forEach(hosts);
 		}
 	}
 	
-	private static <T> Stream<T> stream(T ... elements) {
-		return asList(elements).stream();
-	}
+	
 
 }
