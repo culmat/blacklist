@@ -1,6 +1,6 @@
 package blacklist;
 
-import static blacklist.Streams.stream;
+import static blacklist.stream.Streams.stream;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,12 +26,12 @@ public class Hosts implements Consumer<String> {
 	@Override
 	public void accept(String host) {
 		if(!LOCALHOST.test(host)) {
-			hosts.add(host); 
+			hosts.add(reverse(host)); 
 		}
 	}
 	
 	private static String getHost(String dnsName) {
-		return reverse(stream(reverse(dnsName).split("\\.", 3)).limit(2).collect(Collectors.joining(".")));
+		return stream(dnsName.split("\\.", 3)).limit(2).collect(Collectors.joining("."));
 	}
 
 	private static String reverse(String string) {
@@ -41,7 +41,7 @@ public class Hosts implements Consumer<String> {
    
 	
 	public Stream<String> toStream() {
-		return hosts.stream();
+		return hosts.stream().map(Hosts::reverse);
 	}
 	
 	public Stream<Entry<Integer, String>> stats() {
@@ -52,7 +52,7 @@ public class Hosts implements Consumer<String> {
 		
 		hostCount.entrySet().stream()
 			.filter(e -> e.getValue() > 1)
-			.forEach(e2 -> orderHostCount.put(e2.getValue(), e2.getKey()));
+			.forEach(e2 -> orderHostCount.put(e2.getValue(), reverse(e2.getKey())));
 		
 		return orderHostCount.entrySet().stream();
 	}

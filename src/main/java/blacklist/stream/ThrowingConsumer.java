@@ -1,4 +1,4 @@
-package blacklist;
+package blacklist.stream;
 
 import java.util.function.Consumer;
 

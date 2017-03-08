@@ -1,6 +1,6 @@
 package blacklist;
 
-import static blacklist.Streams.stream;
+import static blacklist.stream.Streams.stream;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,6 +12,8 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import blacklist.stream.ThrowingConsumer;
 
 public class Aggregator {
 
